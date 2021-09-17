@@ -123,10 +123,12 @@ predictor.y.hat = dataprep.out$X0%*%synth.out$solution.w  #合成北京predictor
     xlab("") +
     scale_x_continuous(breaks=2010:2019+1,labels = unique(data$year)[seq(4,40,4)])+
     theme(axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9, color = "black"),
+          axis.text  = element_text(color = "black",size = 15),
           axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5), #y轴标题位置，vjust调整上下位置
+          axis.line = element_line(colour = "black"),
           text = element_text(family = "serif"),
-          # legend.position="bottom", 
-          legend.position=c(0.5,-0.3),  #图例位置，第二个数字是上下
+          # legend.position="bottom",
+          legend.position=c(0.5,-0.15),  #图例位置，第二个数字是上下
           legend.direction = "horizontal",
           plot.margin=unit(c(1,1,2,1),'lines'))
   
@@ -139,7 +141,8 @@ g_p <- ggplot(data=plot.df) +
   xlab("") +
   scale_x_continuous(breaks=2010:2019+1,labels = unique(data$year)[seq(4,40,4)])+
   theme(axis.text.x = element_text(angle=45, hjust=1, vjust=0.9, color = "black"),
-        axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5),
+        axis.text  = element_text(color = "black",size = 15),
+        axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5,size = 15),
         text = element_text(family = "serif")
   )
 g_p2 <- g_p + geom_line(mapping = aes(x=year,y=True-Predicted),size=1)

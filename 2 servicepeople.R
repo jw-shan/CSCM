@@ -2,7 +2,7 @@ rm(list=ls())
 
 # Required packages
 source("CSCM_functions.R")
-packages <- c("ggplot2", "Synth", "glmnet","dplyr", "osqp", "optimx","openxlsx")
+packages <- c("ggplot2", "Synth", "glmnet","dplyr", "osqp", "optimx","openxlsx","grid")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {install.packages(setdiff(packages, rownames(installed.packages())))}
 sapply(packages, require, character.only=TRUE)
 
@@ -114,16 +114,19 @@ g_p <- ggplot(data=plot.df.tr) +
          "金\n融\n业\n相\n对\n就\n业\n人\n数",
          "信\n息\n相\n对\n就\n业\n人\n数")[industry]) + 
   xlab("") +
-  scale_linetype_manual("", values=c(1,5))+
+  scale_linetype_manual("", values=c(1,5),guide=guide_legend(override.aes=list(lwd=c(1,0.5))))+
   scale_x_continuous(breaks=seq(2003,2019,2))+
-  theme(axis.text.x  = element_text(color = "black"),
-      axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5), #y轴标题位置，vjust调整上下位置
-      axis.line = element_line(colour = "black"),
+  theme(axis.text = element_text(color = "black",size = 15), # 坐标轴字体大小
+      axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5, size = 15),  #y轴标题位置和大小，vjust调整上下位置
       text = element_text(family = "serif"),
-      # legend.position="bottom",
-      legend.position=c(0.5,-0.15),  #图例位置，第二个数字是上下
       legend.direction = "horizontal",
-      plot.margin=unit(c(1,1,2,1),'lines'))
+      legend.text  = element_text(size = 15), # 图例字体大小
+      legend.key.size = unit(3, "lines"),
+      legend.position="bottom"
+      # legend.position=c(0.5,-0.15),   #图例位置，需要调整第二个数字控制上下
+      # plot.margin=unit(c(1,1,2,1),'lines')
+      )
+
 
 g_p
 }
@@ -138,8 +141,8 @@ g_p
            "信\n息\n相\n对\n就\n业\n人\n数\n差\n值")[industry]) +
     xlab("") +
     scale_x_continuous(breaks=seq(2003,2019,2)) +
-    theme(axis.text.x  = element_text(color = "black"),
-          axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5),
+    theme(axis.text  = element_text(color = "black",size = 15),
+          axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5,size = 15),
           text = element_text(family = "serif"))
   g_p2 <- g_pp + geom_line(mapping = aes(x=year,y=True-Predicted),size=1)
   g_p2
@@ -187,6 +190,7 @@ for (i in 1:length(control)) {
   RMSPE.df[i+1,"RMSPE"]      = sqrt(sum((plot.df2$True[1:tr_time-1]-plot.df2$Predicted[1:tr_time-1])^2)/(tr_time-1))
   RMSPE.df[i+1,"RMSPE_post"] = sqrt(sum((plot.df2$True[-1:-tr_time+1]-plot.df2$Predicted[-1:-tr_time+1])^2)/(length(year)-tr_time+1))
   
+  print(RMSPE.df[i+1,"RMSPE"])
   if (RMSPE.df[i+1,"RMSPE"]<1) {
     count = count+1
     RMSPE.df[i+1,"ind"]=1
