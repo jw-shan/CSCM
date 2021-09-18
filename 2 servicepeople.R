@@ -39,10 +39,7 @@ predictors <- c("ln(pGDP)", "size","asset", "FDI/GDP", "research", "urbanization
 special.predictors <- list(
   list(Y, 2003:2014, "mean"),
   list(Y, 2003, "mean"),
-  list(Y, 2005, "mean"),
-  list(Y, 2007, "mean"),
-  list(Y, 2009, "mean"),
-  list(Y, 2011, "mean"),
+  list(Y, 2008, "mean"),
   list(Y, 2013, "mean")
 )
 
@@ -52,6 +49,7 @@ special.predictors <- list(
 
 road.main.res <- countSynth(data=data,
                             predictors=predictors, 
+                            special.predictors=special.predictors,
                             dependent=c(Y),
                             unit.variable="ID",
                             time.variable = "year",
@@ -165,15 +163,16 @@ RMSPE.df[,"ind"] = 0
 
 for (i in 1:length(control)) {
   road.main.res2 <- countSynth(data=data,
-                               predictors=NULL, #Auxiliary covariates can be included here as well (passed to dataprep synth, averaged across pre-period with na.rm=TRUE). Caution: needs to have non-missing values in all holdout samples.
+                               predictors=predictors, 
+                               special.predictors=special.predictors,
                                dependent=c(Y),
                                unit.variable="ID",
                                time.variable = "year",
-                               treatment.identifier = control[i], # 25 = Sweden
-                               controls.identifier = control[-i], #We exclude UK, Norway, Netherlands due to similar policies. Est, Rou, Lva due to data issues. Other countries due to missing values.
-                               t_int=tr_time, #Treatment time point (1997 in real years)
-                               min_1se=F, #Use 1se rule for lambda CV? (try changing to T for sensitivity analysis)
-                               K=2) #Number of holdout periods for cross-fitting (try changing to 3 for sensitivity analysis)
+                               treatment.identifier = control[i], 
+                               controls.identifier = control[-i], 
+                               t_int=tr_time, 
+                               min_1se=F, 
+                               K=2) 
   
   cscm.cf2 <- road.main.res2$dataprep.main$Y0plot %*% as.numeric(road.main.res2$unit.weight.full.sample)
   pre_df2 <- as.data.frame(cbind(year,cscm.cf2,rep("Predicted",length(year))))
