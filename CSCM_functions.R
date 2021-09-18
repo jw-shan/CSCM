@@ -6,10 +6,15 @@
 # Note: This file is called automatically by the other R scripts and
 #       does not have to be opened manually.
 
+packages <- c("ggplot2", "Synth", "glmnet","dplyr", "osqp", "optimx","openxlsx","grid")
+if (length(setdiff(packages, rownames(installed.packages()))) > 0) {install.packages(setdiff(packages, rownames(installed.packages())))}
+sapply(packages, require, character.only=TRUE)
+
+
+
 # ------------ FUNCTIONS BELOW ------------- #
 
 # Variable importance functions
-
 .g0_varimp = function(X, y) {
   
   fit = suppressWarnings(glmnet::cv.glmnet(x=as.matrix(scale(X)),

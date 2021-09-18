@@ -11,8 +11,8 @@ city = colnames(data)[-1]
 data_growth.df = data[,-1]
 
 
-## or you can load RData directly by
-# load("./RData/financepeople.RData")
+## We suggest you load the RData file directly 
+load("./RData/financepeople.RData")
 
 
 # ------------------- #

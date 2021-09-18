@@ -3,18 +3,15 @@ options(warn=-1)
 
 # Required packages
 source("CSCM_functions.R")
-packages <- c("ggplot2", "Synth", "glmnet","dplyr", "osqp", "optimx","openxlsx","grid")
-if (length(setdiff(packages, rownames(installed.packages()))) > 0) {install.packages(setdiff(packages, rownames(installed.packages())))}
-sapply(packages, require, character.only=TRUE)
-
-
+library(openxlsx)
+library(grid)
 
 
 # Load data
 data <- read.xlsx("data.xlsx",sheet=2)
 
-## or you can load RData directly by
-# load("./RData/servicepeople.RData")
+## We suggest you load the RData file directly 
+load("./RData/servicepeople.RData")
 
 
 #----------------------------------#
@@ -33,9 +30,9 @@ data <- read.xlsx("data.xlsx",sheet=2)
 year = 2003:2019
 city = unique(data$city)
 Y = c("sciencepeople","financepeople","informationpeople")[industry]
-control = unique(data$ID)[c(-1)]
 tr_time = 13  #Treatment time point (1997 in real years)
-
+tr_unit = 1   #1 = Beijing
+control = unique(data$ID)[c(-tr_unit)]
 
 # ------------------- #
 #  Predictors
@@ -58,7 +55,7 @@ road.main.res <- countSynth(data=data,
                             dependent=c(Y),
                             unit.variable="ID",
                             time.variable = "year",
-                            treatment.identifier = 1, # 1 = Beijing
+                            treatment.identifier = tr_unit, # 1 = Beijing
                             controls.identifier = control,
                             t_int=tr_time)
 
@@ -73,7 +70,7 @@ csynth.w <- round(road.main.res$unit.weight.full.sample, 2)
 cunit.names <- unique(data %>% dplyr::filter(ID %in% control) %>% dplyr::select(ID, city))
 cunit.ordered <- as.data.frame(cunit.names[order(cunit.names$city),])
 cunit.synth = cunit.csynth = cunit.ordered
-cunit.synth$Country <- unique(data$city)[-1]
+cunit.synth$Country <- unique(data$city)[control]
 cunit.synth$SCM.W <- synth.w
 cunit.synth$CSCM.W <- csynth.w
 
@@ -183,15 +180,14 @@ for (i in 1:length(control)) {
   
   # 
   plot.df2 = data.frame(year=year)
-  plot.df2$True = as.numeric(true_df2$Y)
-  plot.df2$Predicted = as.numeric(pre_df2$Y)
+  plot.df2$True = as.numeric(as.character(true_df2$Y))
+  plot.df2$Predicted = as.numeric(as.character(pre_df2$Y))
   
   pre_diff.df[,i+1] = plot.df2$True - plot.df2$Predicted  
   
   RMSPE.df[i+1,"RMSPE"]      = sqrt(sum((plot.df2$True[1:tr_time-1]-plot.df2$Predicted[1:tr_time-1])^2)/(tr_time-1))
   RMSPE.df[i+1,"RMSPE_post"] = sqrt(sum((plot.df2$True[-1:-tr_time+1]-plot.df2$Predicted[-1:-tr_time+1])^2)/(length(year)-tr_time+1))
   
-  print(RMSPE.df[i+1,"RMSPE"])
   if (RMSPE.df[i+1,"RMSPE"]<1) {
     count = count+1
     RMSPE.df[i+1,"ind"]=1

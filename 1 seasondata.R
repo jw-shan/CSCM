@@ -22,8 +22,8 @@ data = data[-which(data$city%in%c("石家庄","哈尔滨","西宁","南宁","乌
 city = unique(data$city)
 
 
-## or you can load RData file directly by
-# load("./RData/seasondata.RData")
+## We suggest you load the RData file directly 
+load("./RData/seasondata.RData")
 
 
 # ======================================================================== #
