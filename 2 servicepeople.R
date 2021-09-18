@@ -1,4 +1,5 @@
 rm(list=ls())
+options(warn=-1)
 
 # Required packages
 source("CSCM_functions.R")
@@ -11,6 +12,10 @@ sapply(packages, require, character.only=TRUE)
 
 # Load data
 data <- read.xlsx("data.xlsx",sheet=2)
+
+## or you can load RData directly by
+# load("./RData/servicepeople.RData")
+
 
 #----------------------------------#
 #      choose industry
@@ -55,9 +60,7 @@ road.main.res <- countSynth(data=data,
                             time.variable = "year",
                             treatment.identifier = 1, # 1 = Beijing
                             controls.identifier = control,
-                            t_int=tr_time, 
-                            min_1se=F, 
-                            K=2)
+                            t_int=tr_time)
 
 
 
@@ -162,6 +165,7 @@ colnames(pre_diff.df)[-1] = city
 RMSPE.df[,"ind"] = 0
 
 for (i in 1:length(control)) {
+  print(paste0("[",i,"/",length(control),"]"))
   road.main.res2 <- countSynth(data=data,
                                predictors=predictors, 
                                special.predictors=special.predictors,
@@ -170,9 +174,7 @@ for (i in 1:length(control)) {
                                time.variable = "year",
                                treatment.identifier = control[i], 
                                controls.identifier = control[-i], 
-                               t_int=tr_time, 
-                               min_1se=F, 
-                               K=2) 
+                               t_int=tr_time) 
   
   cscm.cf2 <- road.main.res2$dataprep.main$Y0plot %*% as.numeric(road.main.res2$unit.weight.full.sample)
   pre_df2 <- as.data.frame(cbind(year,cscm.cf2,rep("Predicted",length(year))))

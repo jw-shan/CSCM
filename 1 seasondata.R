@@ -1,4 +1,5 @@
 rm(list=ls())
+options(warn=-1)
 library(ggplot2)
 library(grid)
 library(Synth)
@@ -6,10 +7,11 @@ library(openxlsx)
 library(dplyr)
 
 
-data <- read.xlsx("data.xlsx",sheet=1)[,c(1:2,11:21)]
-# 
-city = unique(data$city)
 
+# --- load data from xlsx file -------
+data = read.xlsx("data.xlsx",sheet=1)[,c(1:2,11:21)]
+
+city = unique(data$city)
 data = data.frame(city=data[,1], ID = rep(1:length(city),each=40),
                   year=data[,2], year_ID=1:40,data[,-1:-2])
 
@@ -20,7 +22,8 @@ data = data[-which(data$city%in%c("石家庄","哈尔滨","西宁","南宁","乌
 city = unique(data$city)
 
 
-
+## or you can load RData file directly by
+# load("./RData/seasondata.RData")
 
 
 # ======================================================================== #
@@ -124,13 +127,16 @@ predictor.y.hat = dataprep.out$X0%*%synth.out$solution.w  #合成北京predictor
     scale_x_continuous(breaks=2010:2019+1,labels = unique(data$year)[seq(4,40,4)])+
     theme(axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9, color = "black"),
           axis.text  = element_text(color = "black",size = 15),
-          axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5), #y轴标题位置，vjust调整上下位置
+          axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5,size = 15), #y轴标题位置，vjust调整上下位置
           axis.line = element_line(colour = "black"),
           text = element_text(family = "serif"),
-          # legend.position="bottom",
-          legend.position=c(0.5,-0.15),  #图例位置，第二个数字是上下
           legend.direction = "horizontal",
-          plot.margin=unit(c(1,1,2,1),'lines'))
+          legend.text  = element_text(size = 15), # 图例字体大小
+          legend.key.size = unit(3, "lines"),
+          legend.position="bottom"
+          # legend.position=c(0.5,-0.15),  
+          # plot.margin=unit(c(1,1,2,1),'lines')
+          )
   
   g_m
 }
