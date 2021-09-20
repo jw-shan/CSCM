@@ -8,12 +8,12 @@ library(dplyr)
 
 
 
-# --- load data from xlsx file -------
-data = read.xlsx("data.xlsx",sheet=1)[,c(1:2,11:21)]
-
-city = unique(data$city)
-data = data.frame(city=data[,1], ID = rep(1:length(city),each=40),
-                  year=data[,2], year_ID=1:40,data[,-1:-2])
+# # --- load data from xlsx file -------
+# data = read.xlsx("data.xlsx",sheet=1)[,c(1:2,11:21)]
+# 
+# city = unique(data$city)
+# data = data.frame(city=data[,1], ID = rep(1:length(city),each=40),
+#                   year=data[,2], year_ID=1:40,data[,-1:-2])
 
 
 # 删除不可用城市数据

@@ -4,11 +4,11 @@ library(pampe)
 library(openxlsx)
 
 
-# load data
-data <- read.xlsx("data.xlsx", sheet = 3)
-year = data$year
-city = colnames(data)[-1]
-data_growth.df = data[,-1]
+# # load data
+# data <- read.xlsx("data.xlsx", sheet = 3)
+# year = data$year
+# city = colnames(data)[-1]
+# data_growth.df = data[,-1]
 
 
 ## We suggest you load the RData file directly 

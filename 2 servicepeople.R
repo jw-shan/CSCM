@@ -7,8 +7,8 @@ library(openxlsx)
 library(grid)
 
 
-# Load data
-data <- read.xlsx("data.xlsx",sheet=2)
+# # Load data
+# data <- read.xlsx("data.xlsx",sheet=2)
 
 ## We suggest you load the RData file directly 
 load("./RData/servicepeople.RData")
@@ -32,7 +32,13 @@ city = unique(data$city)
 Y = c("sciencepeople","financepeople","informationpeople")[industry]
 tr_time = 13  #Treatment time point (1997 in real years)
 tr_unit = 1   #1 = Beijing
-control = unique(data$ID)[c(-tr_unit)]
+
+if (industry==2) {
+  control = unique(data$ID)[c(-tr_unit,-33)]
+}else{
+  control = unique(data$ID)[c(-tr_unit)]
+}
+
 
 # ------------------- #
 #  Predictors
