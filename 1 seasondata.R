@@ -116,42 +116,66 @@ predictor.y.hat = dataprep.out$X0%*%synth.out$solution.w  #合成北京predictor
   RMSPE.df[1,3] = sqrt(sum((plot.df$True[-1:-tr_time+1]-plot.df$Predicted[-1:-tr_time+1])^2)/(length(year)-tr_time+1))
   print(paste0("RMSPE=",round(RMSPE.df[1,2],4)))
 }
+ 
   
-  g_m <- ggplot(data=plot.df) +
-    geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=1)+
-    geom_line(mapping = aes(x=year,y=Predicted,linetype="合成北京"),alpha=1,size=0.7)+
-    geom_vline(xintercept=2015.5,linetype=2,alpha=0.8)  + theme_classic() +
-    scale_linetype_manual("", values=c(1,5))+
-    ylab("产\n业\n结\n构\n高\n级\n化") +
-    xlab("") +
-    scale_x_continuous(breaks=2010:2019+1,labels = unique(data$year)[seq(4,40,4)])+
-    theme(axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9, color = "black"),
-          axis.text  = element_text(color = "black",size = 15),
-          axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5,size = 15), #y轴标题位置，vjust调整上下位置
-          axis.line = element_line(colour = "black"),
-          text = element_text(family = "serif"),
-          legend.direction = "horizontal",
-          legend.text  = element_text(size = 15), # 图例字体大小
-          legend.key.size = unit(3, "lines"),
-          legend.position="bottom"
-          # legend.position=c(0.5,-0.15),  
-          # plot.margin=unit(c(1,1,2,1),'lines')
-          )
-  
-  g_m
-}
+    g_p <- ggplot(data=plot.df) +
+      geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=0.8)+
+      geom_line(mapping = aes(x=year,y=Predicted,linetype="合成北京"),alpha=1,size=0.7)+
+      geom_vline(xintercept=2015.5,linetype=2,alpha=0.8)  + theme_classic() +
+      ylab("产\n业\n结\n构\n高\n级\n化") +
+      xlab("") +
+      scale_x_continuous(breaks=2010:2019+1,labels = unique(data$year)[seq(4,40,4)])+
+      theme(axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9, color = "black"),
+            axis.text  = element_text(color = "black",size = 18),
+            axis.title.y = element_text(angle=0,  hjust=0, vjust=0.6,size = 18), #y轴标题位置，vjust调整上下位置
+            axis.line = element_line(colour = "black"),
+            text = element_text(family = "serif"),
+            legend.direction = "horizontal",
+            legend.text  = element_text(size = 15), # 图例字体大小
+            legend.key.size = unit(3, "lines"),
+            legend.position="bottom"
+            # legend.position=c(0.5,-0.15),
+            # plot.margin=unit(c(1,1,2,1),'lines')
+            )
 
-g_p <- ggplot(data=plot.df) +
+    g_p
+  }
+
+#   g_p <- ggplot(data=plot.df) +
+#     geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=0.8)+
+#     geom_line(mapping = aes(x=year,y=Predicted,linetype="合成北京"),alpha=0.8)+
+#     geom_vline(xintercept=2015.5,linetype=2,alpha=0.8)  + theme_classic() +
+#     scale_linetype_manual("", values=c(1,2))+  # ！！！！！！！value改线类型，1和2分别是实线和虚线！！！！！！！！！
+#     ylab("产\n业\n结\n构\n高\n级\n化") +
+#     xlab("") +
+#     scale_x_continuous(breaks=2010:2019+1,labels = unique(data$year)[seq(4,40,4)])+
+#     theme(axis.text.x  = element_text(angle=45, hjust=1, vjust=0.9, color = "black"),
+#           axis.text  = element_text(color = "black",size = 18),
+#           axis.title.y = element_text(angle=0,  hjust=0, vjust=0.6,size = 18), #y轴标题位置，vjust调整上下位置
+#           axis.line = element_line(colour = "black"),
+#           text = element_text(family = "serif"),
+#           legend.direction = "horizontal",
+#           legend.text  = element_text(size = 15), # 图例字体大小
+#           legend.key.size = unit(3, "lines"),
+#           legend.position="bottom"
+#           # legend.position=c(0.5,-0.15),
+#           # plot.margin=unit(c(1,1,2,1),'lines')
+#           )
+# 
+#   g_p
+# }
+
+g_pp <- ggplot(data=plot.df) +
   geom_vline(xintercept=2015.5,linetype=2)+ geom_hline(yintercept=0,linetype=2)  + theme_classic() +
   ylab("产\n业\n结\n构\n高\n级\n化\n差\n值") +
   xlab("") +
   scale_x_continuous(breaks=2010:2019+1,labels = unique(data$year)[seq(4,40,4)])+
   theme(axis.text.x = element_text(angle=45, hjust=1, vjust=0.9, color = "black"),
-        axis.text  = element_text(color = "black",size = 15),
-        axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5,size = 15),
+        axis.text  = element_text(color = "black",size = 18),
+        axis.title.y = element_text(angle=0,  hjust=0, vjust=0.6,size = 18),
         text = element_text(family = "serif")
   )
-g_p2 <- g_p + geom_line(mapping = aes(x=year,y=True-Predicted),size=1)
+g_p2 <- g_pp + geom_line(mapping = aes(x=year,y=True-Predicted),size=0.8)
 g_p2
 
 
@@ -159,7 +183,7 @@ g_p2
 # -------------------- #
 #    placebo           #
 # -------------------- #
-g_p3 = g_p + geom_line(mapping = aes(x=year,y=True-Predicted),size=1.1)
+g_p3 = g_pp + geom_line(mapping = aes(x=year,y=True-Predicted),size=0.8)
 count = 0
 pre_diff.df = data.frame(year=year)
 pre_diff.df[,2:(length(city)+1)] = NA
@@ -194,8 +218,8 @@ for (i in 1:length(control)) {
   
   if (RMSPE.df[i+1,2]<0.06) {
     count = count+1
-    # g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.3,size=0.5) #size=粗细，alpha=深浅
-    g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 2,alpha=0.5,size=0.6) #size=粗细，alpha=深浅
+    g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.2,size=0.5) #size=粗细，alpha=深浅
+    # g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 2,alpha=0.5,size=0.5) #size=粗细，alpha=深浅
   }
   
 }

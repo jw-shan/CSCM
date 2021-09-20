@@ -46,18 +46,18 @@ plot.df.tr = data.frame(year=year,True=pol.integ$counterfactual[,1],Predicted=po
 
 
 g_p <- ggplot(data=plot.df.tr) +
-  geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=1)+   # size尝试1.1和1.2，看哪个更美观
+  geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=0.8)+   
   geom_line(mapping = aes(x=year,y=Predicted,linetype="合成北京"),alpha=1,size=0.7)+
   geom_vline(xintercept=2015,linetype=2,alpha=0.8)  + theme_classic() +
   ylab("金\n融\n相\n对\n就\n业\n人\n数") + 
   xlab("") +
   scale_linetype_manual("", values=c(1,5))+
   scale_x_continuous(breaks=seq(2003,2019,2))+
-  theme(axis.text = element_text(color = "black",size = 15), # 坐标轴字体大小
-        axis.title.y = element_text(angle=0,  hjust=0, vjust=0.5, size = 15),  #y轴标题位置和大小，vjust调整上下位置
+  theme(axis.text = element_text(color = "black",size = 18), # 坐标轴字体大小
+        axis.title.y = element_text(angle=0,  hjust=0, vjust=0.6, size = 18),  #y轴标题位置和大小，vjust调整上下位置
         text = element_text(family = "serif"),
         legend.direction = "horizontal",
-        legend.text  = element_text(size = 15), # 图例字体大小
+        legend.text  = element_text(size = 18), # 图例字体大小
         legend.key.size = unit(3, "lines"),
         legend.position="bottom"
         # legend.position=c(0.5,-0.15),   #图例位置，需要调整第二个数字控制上下
