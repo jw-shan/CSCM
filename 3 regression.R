@@ -49,18 +49,18 @@ g_p <- ggplot(data=plot.df.tr) +
   geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=0.8)+   
   geom_line(mapping = aes(x=year,y=Predicted,linetype="合成北京"),alpha=1,size=0.7)+
   geom_vline(xintercept=2015,linetype=2,alpha=0.8)  + theme_classic() +
-  ylab("金\n融\n相\n对\n就\n业\n人\n数") + 
+  ylab("金\n融\n服\n务\n业\n就\n业\n人\n数\n比") + 
   xlab("") +
   scale_linetype_manual("", values=c(1,5))+
   scale_x_continuous(breaks=seq(2003,2019,2))+
   theme(axis.text = element_text(color = "black",size = 18), # 坐标轴字体大小
         axis.title.y = element_text(angle=0,  hjust=0, vjust=0.6, size = 18),  #y轴标题位置和大小，vjust调整上下位置
         text = element_text(family = "serif"),
-        legend.direction = "horizontal",
-        legend.text  = element_text(size = 18), # 图例字体大小
+        # legend.direction = "horizontal",
+        legend.text  = element_text(size = 15), # 图例字体大小
         legend.key.size = unit(3, "lines"),
         legend.position="bottom"
-        # legend.position=c(0.5,-0.15),   #图例位置，需要调整第二个数字控制上下
+        # legend.position=c(0.15,0.9)
         # plot.margin=unit(c(1,1,2,1),'lines')
   )
 
@@ -71,7 +71,7 @@ g_p
   g_pp <- ggplot(data=plot.df.tr) +
     geom_vline(xintercept=2015,linetype=2)+ geom_hline(yintercept=0,linetype=2)  + theme_classic() +
     theme(text = element_text(size=10)) +
-    ylab("金\n融\n相\n对\n就\n业\n人\n数") +
+    ylab("金\n融\n服\n务\n业\n就\n业\n人\n数\n比\n差\n值") +
     xlab("") +
     scale_x_continuous(breaks=seq(2003,2019,2)) +
     theme(axis.text  = element_text(color = "black",size = 15),
@@ -88,7 +88,7 @@ g_p
 #    placebo           #
 # -------------------- #
 {
-g_p3 = g_pp + geom_line(mapping = aes(x=year,y=True-Predicted),size=1.1)
+g_p3 = g_pp + geom_line(mapping = aes(x=year,y=True-Predicted,linetype="北京",alpha="北京"),size=0.8)
 count = 0
 
 pre_diff.df = data.frame(year=year)
@@ -113,12 +113,25 @@ for (i in 1:length(control)) {
   if (RMSPE.df[i+1,"RMSPE"]<1) {
     count = count+1
     RMSPE.df[i+1,"ind"]=1
-    # g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.3,size=0.5) #size=粗细，alpha=深浅
-    g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 2,alpha=0.5,size=0.6) #size=粗细，alpha=深浅
+    
+    if (count == 1) {
+      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "其他城市",alpha="其他城市"),size=0.5) #size=粗细，alpha=深浅
+    }else{
+      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.2,size=0.5) #size=粗细，alpha=深浅
+    }
   }
   
   message("Done.")
 }
 
-g_p3
+# 自定义图例
+g_p4 <- g_p3 +  scale_alpha_manual("", breaks=c("北京","其他城市"), values=c(1,0.2))+
+  scale_linetype_manual("", breaks=c("北京","其他城市"), values=c(1,1), guide=guide_legend(override.aes=list(lwd=c(1,0.5)))) +
+  theme(  legend.text  = element_text(size = 15), # 图例字体大小
+          legend.key.size = unit(3, "lines"),
+          legend.position="bottom"
+          # legend.position=c(0.15,0.9)
+  )
+g_p4
+
 
