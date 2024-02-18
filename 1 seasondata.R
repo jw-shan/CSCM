@@ -142,7 +142,7 @@ predictor.y.hat = dataprep.out$X0%*%synth.out$solution.w  #合成北京predictor
   # }
 
   g_p <- ggplot(data=plot.df) +
-    geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=0.8)+
+    geom_line(mapping = aes(x=year,y=True,linetype="北京"),size=1.2)+
     geom_line(mapping = aes(x=year,y=Predicted,linetype="合成北京"),alpha=1)+
     geom_vline(xintercept=2015.5,linetype=2,alpha=0.8)  + theme_classic() +
     scale_linetype_manual("", values=c(1,5),guide=guide_legend(override.aes=list(lwd=c(1,0.5))))+  # ！！！！value改线类型，1和2分别是实线和虚线！！！！！！！！！
@@ -164,6 +164,18 @@ predictor.y.hat = dataprep.out$X0%*%synth.out$solution.w  #合成北京predictor
 
   g_p
 }
+
+
+
+ggsave(
+  filename = paste0("./fig/产业结构高级化.png"), # 保存的文件名称。通过后缀来决定生成什么格式的图片
+  width = 9.5,             # 宽
+  height = 9.5,            # 高
+  units = "in",          # 单位
+  dpi = 300              # 分辨率DPI
+)
+
+
 
 # 差值的图
 g_pp <- ggplot(data=plot.df) +
@@ -221,9 +233,9 @@ for (i in 1:length(control)) {
     count = count+1
     
     if (count == 1) {
-      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "其他城市",alpha="其他城市"),size=0.5) #size=粗细，alpha=深浅
+      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "其他城市",alpha="其他城市"),size=0.8) #size=粗细，alpha=深浅
     }else{
-      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.15,size=0.5) #size=粗细，alpha=深浅
+      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.15,size=0.8) #size=粗细，alpha=深浅
       
     }
   }
@@ -238,6 +250,16 @@ g_p4 <- g_p3 + scale_alpha_manual("", breaks=c("北京","其他城市"), values=
           # legend.position=c(0.15,0.9)
           )
 g_p4
+
+
+
+ggsave(
+  filename = paste0("./fig/稳健性检验-产业结构高级化.png"), # 保存的文件名称。通过后缀来决定生成什么格式的图片
+  width = 9.5,             # 宽
+  height = 9.5,            # 高
+  units = "in",          # 单位
+  dpi = 300              # 分辨率DPI
+)
 
 
 

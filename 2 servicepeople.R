@@ -3,8 +3,9 @@ options(warn=-1)
 
 # Required packages
 source("CSCM_functions.R")
-library(openxlsx)
+# library(openxlsx)
 library(grid)
+library(ggplot2)
 
 
 # # Load data
@@ -138,7 +139,7 @@ g_p
 # -- 
 {
   g_pp <- ggplot(data=plot.df.tr) +
-    geom_vline(xintercept=2015,linetype=2)+ geom_hline(yintercept=0,linetype=2)  + theme_classic() +
+    geom_vline(xintercept=2015,linetype=2,alpha=0.8)+ geom_hline(yintercept=0,linetype=1,alpha=0.4)  + theme_classic() +
     theme(text = element_text(size=18)) +
     ylab(c("科\n技\n服\n务\n业\n就\n业\n人\n数\n比\n差\n值",
            "金\n融\n服\n务\n业\n就\n业\n人\n数\n比\n差\n值",
@@ -158,7 +159,7 @@ g_p
 # -------------------- #
 #    placebo           #
 # -------------------- #
-g_p3 = g_pp + geom_line(mapping = aes(x=year,y=True-Predicted, linetype="北京",alpha="北京"),size=0.8)
+g_p3 = g_pp + geom_line(mapping = aes(x=year,y=True-Predicted, linetype="北京",alpha="北京",color="北京"),size=1)
 count = 0
 
 pre_diff.df = data.frame(year=year)
@@ -168,7 +169,7 @@ colnames(pre_diff.df)[-1] = city
 
 RMSPE.df[,"ind"] = 0
 
-for (i in 1:length(control)) {
+for (i in (1:length(control))[-17]) {
   print(paste0("[",i,"/",length(control),"]"))
   road.main.res2 <- countSynth(data=data,
                                predictors=predictors, 
@@ -200,15 +201,16 @@ for (i in 1:length(control)) {
     RMSPE.df[i+1,"ind"]=1
    
     if (count == 1) {
-      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "其他城市",alpha="其他城市"),size=0.5) #size=粗细，alpha=深浅
+      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "其他城市",alpha="其他城市",color="其他城市"),size=0.5) #size=粗细，alpha=深浅
     }else{
-      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.2,size=0.5) #size=粗细，alpha=深浅
+      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "其他城市",alpha="其他城市",color="其他城市"),size=0.5) #size=粗细，alpha=深浅
     }
   }
   
 }
 g_p4 <- g_p3 + scale_alpha_manual("", breaks=c("北京","其他城市"), values=c(1,0.2))+
   scale_linetype_manual("", breaks=c("北京","其他城市"), values=c(1,1), guide=guide_legend(override.aes=list(lwd=c(1,0.5)))) + 
+  scale_color_manual("", breaks=c("北京","其他城市"), values=c("black","black"))+
   theme(  legend.text  = element_text(size = 15), # 图例字体大小
           legend.key.size = unit(3, "lines"),
           legend.position="bottom"
@@ -224,6 +226,61 @@ g_p4
 # 
 
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# =======================================================
+#   验证虹吸效应
+#    在上图的稳健型检验基础上加入“毗邻城市的均值”的回归结果
+# =======================================================
+# adjoint_city <- c(2,3,7,19) #毗邻城市在city向量中的位置
+adjoint_city <- c(2,3,19) #毗邻城市在city向量中的位置
+city_adjoint = city[adjoint_city]
+
+tmp <- data %>% filter(city %in% city_adjoint) %>% 
+  group_by(year) %>%     
+  summarise( city="毗邻",ID=36, sciencepeople=mean(sciencepeople), financepeople=mean(financepeople), informationpeople=mean(informationpeople), "ln(pGDP)"=mean(get("ln(pGDP)")), size=mean(size), government=mean(government), open=mean(open), asset=mean(asset), "FDI/GDP"=mean(get("FDI/GDP")), research=mean(research), human=mean(human), finance=mean(finance), urbanization=mean(urbanization)) %>% 
+  select(colnames(data))
+
+data2 <- rbind(data,tmp)
+road.main.mean <- countSynth(data=data2,
+                             predictors=predictors, 
+                             special.predictors=special.predictors,
+                             dependent=c(Y),
+                             unit.variable="ID",
+                             time.variable = "year",
+                             treatment.identifier = 36, 
+                             controls.identifier = control[-adjoint_city], 
+                             t_int=tr_time) 
+
+cscm.cf3 <- road.main.mean$dataprep.main$Y0plot %*% as.numeric(road.main.mean$unit.weight.full.sample)
+pre_df3 <- as.data.frame(cbind(year,cscm.cf3,rep("Predicted",length(year))))
+true_df3 <- as.data.frame(cbind(year,road.main.mean$dataprep.main$Y1plot,rep("_True",length(year))))
+colnames(pre_df3)=colnames(true_df3)=c("year","Y","Method")
+
+# 
+plot.df3 = data.frame(year=year)
+plot.df3$True = as.numeric(as.character(true_df3$Y))
+plot.df3$Predicted = as.numeric(as.character(pre_df3$Y))
+
+g_p5 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "毗邻城市",alpha="毗邻城市",color="毗邻城市"),size=1) #size=粗细，alpha=深浅
+g_p6 <- g_p5 + scale_alpha_manual("", breaks=c("北京","其他城市","毗邻城市"), values=c(1,0.4,0.7))+
+  scale_color_manual("", breaks=c("北京","其他城市","毗邻城市"), values=c("black","black","black"))+
+  scale_linetype_manual("", breaks=c("北京","其他城市","毗邻城市"), values=c(1,1,2), guide=guide_legend(override.aes=list(lwd=c(1,0.5,0.5)))) +
+  theme(  legend.text  = element_text(size = 15), # 图例字体大小
+          legend.key.size = unit(3, "lines"),
+          legend.position="bottom"
+          # legend.position=c(0.15,0.9)
+          # text=element_text(family = "STKaiti")
+  )+ylim(-1.5,2.3)
+g_p6
 
 
 
+#or for plot
+ggsave(
+  filename = "./fig/科技就业人数稳健型检验.png", # 保存的文件名称。通过后缀来决定生成什么格式的图片
+  width = 9.5,             # 宽
+  height = 9.5,            # 高
+  units = "in",          # 单位
+  dpi = 300              # 分辨率DPI
+)

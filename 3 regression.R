@@ -1,7 +1,8 @@
 rm(list=ls())
 options(warn=-1)
 library(pampe)
-library(openxlsx)
+# library(openxlsx)
+library(ggplot2)
 
 
 # # load data
@@ -69,7 +70,7 @@ g_p
 # -- 
 {
   g_pp <- ggplot(data=plot.df.tr) +
-    geom_vline(xintercept=2015,linetype=2)+ geom_hline(yintercept=0,linetype=2)  + theme_classic() +
+    geom_vline(xintercept=2015,linetype=2)+ geom_hline(yintercept=0,linetype=1,alpha=0.4)  + theme_classic() +
     theme(text = element_text(size=10)) +
     ylab("金\n融\n服\n务\n业\n就\n业\n人\n数\n比\n差\n值") +
     xlab("") +
@@ -88,7 +89,7 @@ g_p
 #    placebo           #
 # -------------------- #
 {
-g_p3 = g_pp + geom_line(mapping = aes(x=year,y=True-Predicted,linetype="北京",alpha="北京"),size=0.8)
+g_p3 = g_pp + geom_line(mapping = aes(x=year,y=True-Predicted,linetype="北京",alpha="北京",color="北京"),size=0.8)
 count = 0
 
 pre_diff.df = data.frame(year=year)
@@ -114,19 +115,22 @@ for (i in 1:length(control)) {
     count = count+1
     RMSPE.df[i+1,"ind"]=1
     
-    if (count == 1) {
-      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype = "其他城市",alpha="其他城市"),size=0.5) #size=粗细，alpha=深浅
-    }else{
-      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.2,size=0.5) #size=粗细，alpha=深浅
-    }
+    # if (count == 1) {
+      g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted,linetype="其他城市",alpha="其他城市",color="其他城市"),size=0.5) #size=粗细，alpha=深浅
+    # }else{
+      # g_p3 = g_p3 + geom_line(data = plot.df2, mapping = aes(x=year,y=True-Predicted),linetype = 1,alpha=0.2,size=0.5) #size=粗细，alpha=深浅
+    # }
   }
   
   message("Done.")
 }
 
+
+
 # 自定义图例
 g_p4 <- g_p3 +  scale_alpha_manual("", breaks=c("北京","其他城市"), values=c(1,0.2))+
   scale_linetype_manual("", breaks=c("北京","其他城市"), values=c(1,1), guide=guide_legend(override.aes=list(lwd=c(1,0.5)))) +
+  scale_color_manual("", breaks=c("北京","其他城市"), values=c("black","black"))+
   theme(  legend.text  = element_text(size = 15), # 图例字体大小
           legend.key.size = unit(3, "lines"),
           legend.position="bottom"
@@ -135,3 +139,52 @@ g_p4 <- g_p3 +  scale_alpha_manual("", breaks=c("北京","其他城市"), values
 g_p4
 
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+# =======================================================
+#   验证虹吸效应
+#    在上图的稳健型检验基础上加入“毗邻城市的均值”的回归结果
+# =======================================================
+
+# adjoint_city <- c(2,3,7,19) #毗邻城市在city向量中的位置
+adjoint_city <- c(2,3,7,19) #毗邻城市在city向量中的位置
+city[adjoint_city]
+
+# run regression
+control.mean = city[c(-1,-adjoint_city)]
+data_growth.df$adjoint_mean <- rowMeans(data_growth.df[,adjoint_city])
+
+
+pol.integ.mean <- pampe(time.pretr=time.pretr, time.tr=time.tr, treated="adjoint_mean",
+                        controls=control.mean, data=data_growth.df, nvmax = 8)
+summary(pol.integ.mean)
+
+
+
+# plot
+tr_time = time.tr[1]
+plot.df.mean = data.frame(year=year,True=pol.integ.mean$counterfactual[,1],Predicted=pol.integ.mean$counterfactual[,2])
+
+g_p5 <- g_p3 + geom_line(data = plot.df.mean, mapping = aes(x=year,y=True-Predicted,linetype="毗邻城市",alpha="毗邻城市",color="毗邻城市"),size=1) #size=粗细，alpha=深浅
+
+
+g_p6 <- g_p5 + scale_alpha_manual("", breaks=c("北京","其他城市","毗邻城市"), values=c(1,0.4,0.7))+
+  scale_color_manual("", breaks=c("北京","其他城市","毗邻城市"), values=c("black","black","black"))+
+  scale_linetype_manual("", breaks=c("北京","其他城市","毗邻城市"), values=c(1,1,2), guide=guide_legend(override.aes=list(lwd=c(1,0.5,0.5)))) +
+  theme(  legend.text  = element_text(size = 15), # 图例字体大小
+          legend.key.size = unit(3, "lines"),
+          legend.position="bottom"
+          # legend.position=c(0.15,0.9)
+          # text=element_text(family = "STKaiti")
+  ) + ylim(-2.7,2.3)
+g_p6
+
+
+#or for plot
+ggsave(
+  filename = "./fig/金融就业人数稳健型检验.png", # 保存的文件名称。通过后缀来决定生成什么格式的图片
+  width = 8,             # 宽
+  height = 8,            # 高
+  units = "in",          # 单位
+  dpi = 300              # 分辨率DPI
+)
